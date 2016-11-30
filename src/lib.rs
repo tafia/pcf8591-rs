@@ -1,5 +1,4 @@
 //! A simple API to communicate with PCF8591 Analog Digital converter
-#![recursion_limit = "1024"]
 
 extern crate i2cdev;
 
@@ -8,12 +7,18 @@ use i2cdev::linux::LinuxI2CDevice;
 use i2cdev::core::I2CDevice;
 
 pub use i2cdev::linux::LinuxI2CError;
+
+/// Wrapper over LinuxI2CError
 pub type Result<T> = ::std::result::Result<T, LinuxI2CError>;
 
+/// A struct to handle PCF8591 converter
+///
+/// Allow user to read from given input pin and write to output pin
 pub struct PCF8591 {
     i2c: LinuxI2CDevice,
 }
 
+/// An input Pin enumeration corresponding to the physical analog inputs pins
 #[derive(Debug, Clone, Copy)]
 pub enum PinIn {
     Zero,
