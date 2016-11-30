@@ -1,0 +1,8 @@
+[package]
+name = "pcf8591"
+description = "A safe API for PCF8591 A/D converter"
+version = "0.1.0"
+authors = ["Johann Tuffe <johann.tuffe@gmail.com>"]
+
+[dependencies]
+i2cdev = "0.3.1"
