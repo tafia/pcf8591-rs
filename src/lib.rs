@@ -20,11 +20,11 @@ pub struct PCF8591 {
 
 /// An input Pin enumeration corresponding to the physical analog inputs pins
 #[derive(Debug, Clone, Copy)]
-pub enum PinIn {
-    Zero,
-    One,
-    Two,
-    Three,
+pub enum Pin {
+    AIN0,
+    AIN1,
+    AIN2,
+    AIN3,
 }
 
 impl PCF8591 {
@@ -42,12 +42,12 @@ impl PCF8591 {
     }
 
     /// Reads analog values out of input pin
-    pub fn analog_read(&mut self, pin: PinIn) -> Result<u8> {
+    pub fn analog_read(&mut self, pin: Pin) -> Result<u8> {
         let register = match pin {
-            PinIn::Zero => 0x40,
-            PinIn::One => 0x41,
-            PinIn::Two => 0x42,
-            PinIn::Three => 0x43,
+            Pin::AIN0 => 0x40,
+            Pin::AIN1 => 0x41,
+            Pin::AIN2 => 0x42,
+            Pin::AIN3 => 0x43,
         };
         let _ = try!(self.i2c.smbus_write_byte(register));
         let _ = try!(self.i2c.smbus_read_byte()); // dummy read
