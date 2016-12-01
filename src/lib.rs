@@ -37,7 +37,7 @@ pub type Result<T> = ::std::result::Result<T, LinuxI2CError>;
 /// Allow user to read from given input pin and write to output pin
 pub struct PCF8591 {
     i2c: LinuxI2CDevice,
-    last_read: Option<Pin>,
+    pin: Option<Pin>,
     v_lsb: f64,
 }
 
@@ -61,17 +61,17 @@ impl PCF8591 {
     /// - `address` has to be defined as per Table 5.
     /// - `v_ref` is the board voltage (e.g. typically 3.3V on raspberry pi)
     pub fn new<P: AsRef<Path>>(path: P, address: u16, v_ref: f64) -> Result<PCF8591> {
-        let i2c = try!(LinuxI2CDevice::new(path, address));
-        Ok(PCF8591 { 
-            i2c: i2c, 
-            last_read: None, 
-            v_lsb: v_ref / 255.,
-        })
+        LinuxI2CDevice::new(path, address)
+            .map(|i2c| PCF8591 { 
+                i2c: i2c, 
+                pin: None, 
+                v_lsb: v_ref / 255.,
+            })
     }
 
     /// Reads analog values out of input pin and output digital byte
     fn analog_read_byte(&mut self, pin: Pin) -> Result<u8> {
-        match self.last_read {
+        match self.pin {
             Some(ref p) if *p == pin => (), 
             _ => {
                 // need to change control_byte, as per Fig 4.
@@ -83,7 +83,7 @@ impl PCF8591 {
                 };
                 let _ = try!(self.i2c.smbus_write_byte(control_byte));
                 let _ = try!(self.i2c.smbus_read_byte()); // previous byte, unspecified
-                self.last_read = Some(pin);
+                self.pin = Some(pin);
             }
         }
         self.i2c.smbus_read_byte()
@@ -100,7 +100,7 @@ impl PCF8591 {
 
     /// Writes analog values in the output pin
     fn analog_write_byte(&mut self, value: u8) -> Result<()> {
-        self.last_read = None;
+        self.pin = None;
         // if we send 3 bytes, then it is a D/A conversion
         self.i2c.write(&[0x40, value])
     }
