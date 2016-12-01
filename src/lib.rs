@@ -2,6 +2,7 @@
 //!
 //! [Official doc](http://www.nxp.com/documents/data_sheet/PCF8591.pdf#G1004142294)
 
+#![deny(missing_docs)]
 extern crate i2cdev;
 
 use std::path::Path;
@@ -25,9 +26,13 @@ pub struct PCF8591 {
 /// An input Pin enumeration corresponding to the physical analog inputs pins
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Pin {
+    /// Input Pin 0
     AIN0,
+    /// Input Pin 1
     AIN1,
+    /// Input Pin 2
     AIN2,
+    /// Input Pin 3
     AIN3,
 }
 
