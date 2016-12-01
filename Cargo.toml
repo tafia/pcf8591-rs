@@ -1,8 +1,12 @@
 [package]
 name = "pcf8591"
-description = "A safe API for PCF8591 A/D converter"
+description = "A rust API for PCF8591 A/D converter"
 version = "0.1.0"
-authors = ["Johann Tuffe <johann.tuffe@gmail.com>"]
+authors = ["Johann Tuffe <tafia973@gmail.com>"]
+documentation = "https://docs.rs/pcf8591"
+keywords = ["analog", "digital", "raspberry", "embedded", "I2C"]
+license = "MIT"
+readme = "README.md"
 
 [dependencies]
 i2cdev = "0.3.1"
