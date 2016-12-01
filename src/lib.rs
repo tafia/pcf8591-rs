@@ -1,6 +1,24 @@
-//! A simple API to communicate with PCF8591 Analog Digital converter
+//! An API to communicate with PCF8591 A/D converter
 //!
 //! [Official doc](http://www.nxp.com/documents/data_sheet/PCF8591.pdf#G1004142294)
+//!
+//! # Examples
+//! 
+//! ```rust,should_panic
+//! use pcf8591::{PCF8591, Pin};
+//! use std::thread;
+//! use std::time::Duration;
+//!
+//! // Gets default location on raspberry pi (rev 2)
+//! let mut converter = PCF8591::new("/dev/i2c-1", 0x48, 3.3).unwrap();
+//!
+//! loop {
+//!     let v = converter.analog_read(Pin::AIN0).unwrap();
+//!     println!("Input voltage at pin 0: {}", v);
+//!
+//!     thread::sleep(Duration::from_millis(1000));
+//! }
+//! ```
 
 #![deny(missing_docs)]
 extern crate i2cdev;
@@ -40,14 +58,8 @@ impl PCF8591 {
 
     /// Creates a new connection given i2c path and address
     ///
-    /// `address` has to be defined as per Table 5.
-    /// `v_ref` is the board voltage (e.g. typically 3.3V on raspberry pi)
-    /// 
-    /// # Examples
-    /// ```rust
-    /// // Default location for raspberry pi revision 2
-    /// let da_converter = PCF8591::new("/dev/i2c-1", 0x48).unwrap();
-    /// ```
+    /// - `address` has to be defined as per Table 5.
+    /// - `v_ref` is the board voltage (e.g. typically 3.3V on raspberry pi)
     pub fn new<P: AsRef<Path>>(path: P, address: u16, v_ref: f64) -> Result<PCF8591> {
         let i2c = try!(LinuxI2CDevice::new(path, address));
         Ok(PCF8591 { 
@@ -58,7 +70,7 @@ impl PCF8591 {
     }
 
     /// Reads analog values out of input pin and output digital byte
-    pub fn analog_read_byte(&mut self, pin: Pin) -> Result<u8> {
+    fn analog_read_byte(&mut self, pin: Pin) -> Result<u8> {
         match self.last_read {
             Some(ref p) if *p == pin => (), 
             _ => {
@@ -78,6 +90,8 @@ impl PCF8591 {
     }
     
     /// Reads analog values out of input pin and output corresponding input voltage
+    ///
+    /// Returns analog_read_byte * v_ref / 255 (suppose Vagnd == 0)
     pub fn analog_read(&mut self, pin: Pin) -> Result<f64> {
         // converts read byte as per Fig. 9
         self.analog_read_byte(pin)
@@ -85,10 +99,16 @@ impl PCF8591 {
     }
 
     /// Writes analog values in the output pin
-    pub fn analog_write_byte(&mut self, value: u8) -> Result<()> {
+    fn analog_write_byte(&mut self, value: u8) -> Result<()> {
         self.last_read = None;
         // if we send 3 bytes, then it is a D/A conversion
         self.i2c.write(&[0x40, value])
+    }
+
+    /// Writes analog values in the output pin
+    pub fn analog_write(&mut self, v_out: f64) -> Result<()> {
+        let value = (v_out / self.v_lsb) as u8;
+        self.analog_write_byte(value)
     }
 
 }
