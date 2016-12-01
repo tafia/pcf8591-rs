@@ -48,7 +48,7 @@ impl PCF8591 {
         Ok(PCF8591 { 
             i2c: i2c, 
             last_read: None, 
-            v_lsb: v_ref / 256.,
+            v_lsb: v_ref / 255.,
         })
     }
 
