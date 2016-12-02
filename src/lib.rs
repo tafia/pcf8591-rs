@@ -58,8 +58,8 @@ impl PCF8591 {
 
     /// Creates a new connection given i2c path and address
     ///
-    /// - `path`: device slave path (0x48 per default)
-    /// - `address`: has to be defined as per Table 5.
+    /// - `path`: device slave path (e.g. `/dev/i2c-1`)
+    /// - `address`: has to be defined as per Table 5 (`0x48` per default)
     /// - `v_ref`: is the board voltage (e.g. typically 3.3V on raspberry pi)
     pub fn new<P: AsRef<Path>>(path: P, address: u16, v_ref: f64) -> Result<PCF8591> {
         LinuxI2CDevice::new(path, address)
