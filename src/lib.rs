@@ -58,8 +58,9 @@ impl PCF8591 {
 
     /// Creates a new connection given i2c path and address
     ///
-    /// - `address` has to be defined as per Table 5.
-    /// - `v_ref` is the board voltage (e.g. typically 3.3V on raspberry pi)
+    /// - `path`: device slave path (0x48 per default)
+    /// - `address`: has to be defined as per Table 5.
+    /// - `v_ref`: is the board voltage (e.g. typically 3.3V on raspberry pi)
     pub fn new<P: AsRef<Path>>(path: P, address: u16, v_ref: f64) -> Result<PCF8591> {
         LinuxI2CDevice::new(path, address)
             .map(|i2c| PCF8591 { 
@@ -70,7 +71,10 @@ impl PCF8591 {
     }
 
     /// Reads analog values out of input pin and output digital byte
-    fn analog_read_byte(&mut self, pin: Pin) -> Result<u8> {
+    ///
+    /// The conversion with board voltage is left to the user.
+    /// For automatic conversion, use `analog_read`
+    pub fn analog_read_byte(&mut self, pin: Pin) -> Result<u8> {
         match self.pin {
             Some(ref p) if *p == pin => (), 
             _ => {
@@ -98,8 +102,11 @@ impl PCF8591 {
             .map(|b| b as f64  * self.v_lsb)
     }
 
-    /// Writes analog values in the output pin
-    fn analog_write_byte(&mut self, value: u8) -> Result<()> {
+    /// Writes analog values, as byte, in the output pin
+    ///
+    /// The conversion with board voltage is left to the user
+    /// For automatic conversion, use `analog_write`
+    pub fn analog_write_byte(&mut self, value: u8) -> Result<()> {
         self.pin = None;
         // if we send 3 bytes, then it is a D/A conversion
         self.i2c.write(&[0x40, value])
